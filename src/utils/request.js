@@ -4,12 +4,12 @@ const https = require('https');
 
 // create an axios instance
 const service = axios.create({
-  httpsAgent: new https.Agent({  
+  httpsAgent: new https.Agent({
     rejectUnauthorized: false
   }),
   // baseURL: process.env.BASE_API, // api的base_url
   timeout: 50000 // request timeout
-})
+});
 
 // request interceptor
 service.interceptors.request.use(config => {
@@ -17,14 +17,14 @@ service.interceptors.request.use(config => {
   // 增加token
   // if (store.getters.token) {
   //   // 让每个请求携带token-- ['X-Token']为自定义key 请根据实际情况自行修改
-    // config.headers['Authorization'] = `token ${globalData.token}`
+  // config.headers['Authorization'] = `token ${globalData.token}`
   // }
-  return config
+  return config;
 }, error => {
   // Do something with request error
-  console.log(error) // for debug
-  Promise.reject(error)
-})
+  console.log(error); // for debug
+  Promise.reject(error);
+});
 
 // respone interceptor
 service.interceptors.response.use(
@@ -63,11 +63,11 @@ service.interceptors.response.use(
   //   }
   // },
   error => {
-    console.log('err' + error) // for debug
+    console.log('err' + error); // for debug
     // 错误提示
-    return Promise.reject(error)
-  })
+    return Promise.reject(error);
+  });
 
-  module.exports = {
-    service
-  }
+module.exports = {
+  service
+};
