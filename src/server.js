@@ -1,8 +1,8 @@
 let api = require('./utils/api');
 const tagController = require('./db/tag-controller');
 const repoController = require('./db/repo-controller');
-const baseResult = require('./result/base-result');
-const errorResult = require('./result/error-result');
+const {BaseResult} = require('./result/base-result');
+const {ErrorResult} = require('./result/error-result');
 
 api = api.Api;
 
@@ -70,22 +70,18 @@ app.post('/api/todo', function(req, res) {
 
 app.post('/api/auth', (req, res) => {
   const headers = req.headers;
-  console.log('/api/auth', req.query);
   const code = req.query.code;
 
   console.log('code', code);
 
   api.auth(code, headers).then((response) => {
-    console.log('res', response.data);
     res.end(JSON.stringify(response.data));
   });
 });
 
 app.get('/api/user', (req, res) => {
   const headers = req.headers;
-  console.log(headers);
   api.getAuthenticatedUser(headers).then((response) => {
-    console.log('res', response.data);
 
     res.end(JSON.stringify(response.data));
   });
@@ -95,7 +91,6 @@ app.get('/api/stars', (req, res) => {
   const headers = req.headers;
 
   const page = req.query.page;
-  console.log(headers);
 
   api.starred(page, headers).then((response) => {
     res.end(JSON.stringify(response.data));
@@ -104,7 +99,6 @@ app.get('/api/stars', (req, res) => {
 
 app.post('/api/tags', (req, res) => {
   const headers = req.headers;
-  console.log('headers', headers);
   const userId = headers.userid;
   const body = req.body;
   const time = new Date().getTime();
@@ -117,23 +111,42 @@ app.post('/api/tags', (req, res) => {
   });
 
   tagController.insertTag(data).then(() => {
-    res.end(JSON.stringify(baseResult.result));
+    res.end(JSON.stringify(new BaseResult()));
   }).catch(() => {
-    res.end(JSON.stringify(errorResult.result));
+    res.end(JSON.stringify(new ErrorResult()));
   });
 });
 
 app.get('/api/tags', (req, res) => {
   const headers = req.headers;
-  console.log('headers', headers);
   const userId = headers.userid;
 
   tagController.queryRepoTagsByUserId(userId).then((data) => {
-    const result = baseResult.result;
+    const result = new BaseResult();
     result.data = data;
     res.end(JSON.stringify(result));
   }).catch(() => {
-    res.end(JSON.stringify(errorResult.result));
+    const errorResult = new ErrorResult();
+    res.end(JSON.stringify(errorResult));
+  });
+});
+
+app.put('/api/tags/:id', (req, res) => {
+  const id = req.params.id;
+  const data = req.body;
+  tagController.updateRepoTagById(id, data.name).then(()=> {
+    res.end(JSON.stringify(new BaseResult()));
+  }).catch(() => {
+    res.end(JSON.stringify(new ErrorResult()));
+  });
+});
+
+app.delete('/api/tags/:id', (req, res) => {
+  const id = req.params.id;
+  tagController.deleteRepoTagById(id).then(()=> {
+    res.end(JSON.stringify(new BaseResult()));
+  }).catch(() => {
+    res.end(JSON.stringify(new ErrorResult()));
   });
 });
 

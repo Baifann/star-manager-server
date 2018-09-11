@@ -1,9 +1,11 @@
-const result = {
-  code: 200,
-  msg: 'success',
-  data: {}
-};
+class BaseResult {
+  constructor() {
+    this.code = 200;
+    this.msg = 'success';
+    this.data = {};
+  }
+}
 
 module.exports = {
-  result
+  BaseResult
 };

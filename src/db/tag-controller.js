@@ -1,4 +1,5 @@
-const MongoClient = require('mongodb').MongoClient;
+const Mongodb = require('mongodb');
+const MongoClient = Mongodb.MongoClient;
 const assert = require('assert');
 
 const NAME_DB = 'tags';
@@ -58,6 +59,50 @@ const queryRepoTagsByUserId = function(userId) {
   });
 };
 
+/**
+ * 通过id 更新标签的名称
+ */
+const updateRepoTagById = function(id, tag) {
+  return new Promise((reslove, reject) => {
+    initDB((db, client) => {
+      try {
+        const collection = db.collection(NAME_DB);
+        collection.updateOne({_id: new Mongodb.ObjectID(id)}, {$set: {tag}}, (error, result) => {
+          reslove(result);
+        });
+      } catch (error) {
+        reject(error);
+      } finally {
+        client.close();
+      }
+    });
+  });
+};
+
+/**
+ * 通过id 删除标签
+ */
+const deleteRepoTagById = function(id) {
+  return new Promise((reslove, reject) => {
+    initDB((db, client) => {
+      try {
+        const collection = db.collection(NAME_DB);
+        collection.deleteMany({_id: new Mongodb.ObjectID(id)}, (error, result) => {
+          if (error) {
+            reject(error);
+          } else {
+            reslove(result);
+          }
+        });
+      } catch (error) {
+        reject(error);
+      } finally {
+        client.close();
+      }
+    });
+  });
+};
+
 // const tag = {tagName: '很好', userId: 123123};
 // insertTag(tag);
 
@@ -68,5 +113,7 @@ const queryRepoTagsByUserId = function(userId) {
 
 module.exports = {
   queryRepoTagsByUserId,
-  insertTag
+  insertTag,
+  updateRepoTagById,
+  deleteRepoTagById
 };
