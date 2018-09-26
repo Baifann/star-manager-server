@@ -89,13 +89,39 @@ app.get('/api/user', (req, res) => {
 
 app.get('/api/stars', (req, res) => {
   const headers = req.headers;
+  const userId = headers.userid;
 
   const page = req.query.page;
 
   api.starred(page, headers).then((response) => {
-    res.end(JSON.stringify(response.data));
+
+    (async() => {
+      const repos = response.data;
+      const repoTags = await repoController.queryReposByUserId(userId);
+
+      for (const repo of repos) {
+        const tags = getTagsByRepoId(repoTags, repo.id);
+        repo.tags = tags;
+      }
+
+      res.end(JSON.stringify(repos));
+    })();
   });
 });
+
+/**
+ * 通过repoId获取tags
+ */
+function getTagsByRepoId(tagRepos, repoId) {
+  const repoTag = tagRepos.find(tagRepo => {
+    return tagRepo.repoId === repoId + '';
+  });
+  if (repoTag) {
+    return repoTag.tags;
+  } else {
+    return [];
+  }
+}
 
 app.post('/api/tags', (req, res) => {
   const headers = req.headers;
@@ -144,6 +170,41 @@ app.put('/api/tags/:id', (req, res) => {
 app.delete('/api/tags/:id', (req, res) => {
   const id = req.params.id;
   tagController.deleteRepoTagById(id).then(()=> {
+    res.end(JSON.stringify(new BaseResult()));
+  }).catch(() => {
+    res.end(JSON.stringify(new ErrorResult()));
+  });
+});
+
+app.post('/api/repo/tag/:id', (req, res) => {
+  // repoId
+  const id = req.params.id;
+  const body = req.body;
+  const tags = body.tags;
+  const headers = req.headers;
+  const userId = headers.userid;
+  const data = {
+    repoId: id,
+    tags,
+    userId
+  };
+
+  repoController.insertRepoTags(data).then(() => {
+    res.end(JSON.stringify(new BaseResult()));
+  }).catch(() => {
+    res.end(JSON.stringify(new ErrorResult()));
+  });
+});
+
+app.put('/api/repo/tag/:id', (req, res) => {
+  // repoId
+  const id = req.params.id;
+  const body = req.body;
+  const tags = body.tags;
+  const headers = req.headers;
+  const userId = headers.userid;
+
+  repoController.updateRepoTags(tags, id, userId).then(() => {
     res.end(JSON.stringify(new BaseResult()));
   }).catch(() => {
     res.end(JSON.stringify(new ErrorResult()));

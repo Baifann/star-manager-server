@@ -24,7 +24,27 @@ const insertRepoTags = function(tag) {
       try {
         const collection = db.collection(NAME_DB);
         collection.insertMany([tag], (error, result) => {
-          console.log('Inserted 1 tag into thie repo collection');
+          console.log('Inserted 1 tag into this repo collection');
+          reslove(result);
+        });
+      } catch (error) {
+        reject(error);
+      } finally {
+        client.close();
+      }
+    });
+  });
+};
+
+/**
+ * 通过userId更新它的repo tags
+ */
+const updateRepoTags = function(tags, repoId, userId) {
+  return new Promise((reslove, reject) => {
+    initDB((db, client) => {
+      try {
+        const collection = db.collection(NAME_DB);
+        collection.updateOne({userId: userId, repoId}, {$set: {tags}}, (error, result) => {
           reslove(result);
         });
       } catch (error) {
@@ -66,5 +86,6 @@ const queryReposByUserId = function(userId) {
 
 module.exports = {
   insertRepoTags,
-  queryReposByUserId
+  queryReposByUserId,
+  updateRepoTags
 };
