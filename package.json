@@ -8,5 +8,8 @@
     "eslint-plugin-html": "^4.0.5",
     "express": "^4.16.3",
     "mongodb": "^3.1.4"
+  },
+  "scripts": {
+    "dev": "node src/server.js"
   }
 }
